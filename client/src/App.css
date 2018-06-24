@@ -1,0 +1,20 @@
+.card{
+    margin-top: 5%;
+}
+
+.card-header {
+    text-align: center;
+    color: #2a878c;
+    font-weight: bold;
+}
+
+.authorRow {
+    text-transform: capitalize;
+    padding-left: 3%;
+    color: #2a878c;
+}
+
+.row.titleRow {
+    padding-left: 1%;
+    font-size: large;
+}

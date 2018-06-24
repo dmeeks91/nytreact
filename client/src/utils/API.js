@@ -20,9 +20,8 @@ export default {
   search: ({topic, startYear, endYear}) => {
     let queryString = `https://api.nytimes.com/svc/search/v2/articlesearch.json`;    
     queryString += `?api-key=2d9e638d0b41450a932a20d88d570fd0&q="${topic}"`;
-    queryString += `&begin_date=${startYear}0101&end_date=${endYear}1231`;
-
-    //console.log("Running Query: " + queryString);
+    queryString += `&begin_date=${(startYear) ? startYear : 1900}0101`;
+    queryString += `&end_date=${(endYear) ? endYear : (new Date()).getFullYear()}1231`;
 
     return axios.get(queryString);
   }

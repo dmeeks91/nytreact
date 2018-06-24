@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import Search from "../Search";
 import Nav from "../Nav";
-import DeleteBtn from "../DeleteBtn";
-import {List, ListItem} from "../List";
+import ArticleContainer from "../ArticleContainer";
+import {Container} from "../Grid";
 import API from "../../utils/API";
 
 class AppContainer extends Component {
@@ -13,7 +13,38 @@ class AppContainer extends Component {
     startYear: "",
     endYear: ""
   };
-  deleteArticle = id => {};
+
+  componentDidMount = () => {
+    this.getSavedArticles();
+  };
+
+  deleteArticle = id => {
+    API.deleteArticle(id)
+    .then(() => {
+      this.getSavedArticles();
+      this.onSearch();
+    })
+    .catch(err => console.log(err));
+  };
+
+  getSavedArticles = () => {
+    API.getArticles()
+    .then(res=>{
+      this.setState({savedArticles: res.data});
+    })
+    .catch(err => console.log(err));
+  };
+
+  saveArticle = id => {
+    API.saveArticle(this.state.articles.filter(article => article.id === id)[0])
+    .then(res => {
+      this.setState({
+        articles: this.state.articles.filter(article => article.id !== id),
+        savedArticles: [...this.state.savedArticles, res.data]
+      })
+    })
+    .catch(err => console.log(err));
+  };
 
   onInputChange = e => {
     const { name, value } = e.target;
@@ -23,65 +54,39 @@ class AppContainer extends Component {
   };
 
   onSearch = e => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     API.search(this.state)
     .then(res =>{
-      let array = res.data.response.docs.slice(0,10).map(article => {
+      let articles = res.data.response.docs.map(article => {        
         return {
-          url: article.web_url,
-          date: article.date,
-          title: article.headline.main,
-          author: article.byline.original,
-          _id: article._id
-        }
-      });
-      this.setState({articles:array});
+            url: article.web_url,
+            pubDate: article.pub_date,
+            title: article.headline.main,
+            author: (article.byline)? article.byline.original : "",
+            id: article._id
+          }
+      }).filter(filterArticle => this.state.savedArticles.filter(a => a.title === filterArticle.title).length === 0);
+      this.setState({articles});
     })
     .catch(err => console.log(err));
   };
 
   render() {
     return (
-        <div>
-          <Nav />
+      <div>
+        <Nav />
+        <Container>
           <Search topic = {this.state.topic}
             startYear = {this.state.startYear}
             endYear = {this.state.endYear}
             onInputChange = {this.onInputChange}
             onSearch = {this.onSearch}/>
-            {this.state.articles.length ? (
-              <List>
-                {this.state.articles.map(article => (
-                  <ListItem key={article._id}>
-                    <a href={article.url} target="blank">
-                      <strong>
-                        {article.title} by {article.author}
-                      </strong>
-                    </a>
-                    <DeleteBtn onClick={() => this.deleteArticle(article._id)} />
-                  </ListItem>
-                ))}
-              </List>
-            ) : (
-              <h3>No Articles to Display</h3>
-            )}
-            {this.state.savedArticles.length ? (
-              <List>
-                {this.state.articles.map(article => (
-                  <ListItem key={article._id}>
-                    <a href={article.url}>
-                      <strong>
-                        {article.title} by {article.author}
-                      </strong>
-                    </a>
-                    <DeleteBtn onClick={() => this.deleteArticle(article._id)} />
-                  </ListItem>
-                ))}
-              </List>
-            ) : (
-              <h3>No Saved Articles to Display</h3>
-            )}
-        </div>
+          <ArticleContainer articles = {this.state.articles}
+            onClickBtn = {this.saveArticle} saved = {false}/>
+          <ArticleContainer articles = {this.state.savedArticles}
+            onClickBtn = {this.deleteArticle} saved = {true}/>
+        </Container>
+      </div>
     );
   }
 }
