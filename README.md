@@ -1,5 +1,5 @@
-# nytreact
-This MERN Fullstack application allows users to search the New York times for articles, and save selected articles to MongoDB in order to read later.
+# New York Times React App
+This MERN (Mongo, Express, React, Node) Fullstack application allows users to search the New York times for articles and save selected articles to MongoDB in order to read later.
 
 ![ScreenShot](client/public/images/nytReact.png)
 
